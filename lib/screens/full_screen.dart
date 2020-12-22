@@ -1,8 +1,8 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:uuid/uuid.dart';
 import 'package:video_player/video_player.dart';
 import 'package:chewie/chewie.dart';
+import 'package:whatsapp_status_saver/services/ops.dart';
 
 
 class FullScreen extends StatefulWidget {
@@ -23,22 +23,7 @@ class _FullScreenState extends State<FullScreen> {
     super.initState();
   }
 
-  void _save(BuildContext context)async{
-    try{
-        var dir = Directory("/storage/emulated/0/saver/");
-        if(dir.existsSync()){
-          print("exist");
-        }else{
-          dir.createSync();
-        }
-        var uuid = Uuid().v1();
-        var ext = this.widget.path.split('.').last;
-        File(this.widget.path).copySync('${dir.path}${uuid}.${ext}');
-        Scaffold.of(context).showSnackBar(SnackBar(content: Text("Saved!"),duration: Duration(seconds: 1),));
-    }catch(e){
-        Scaffold.of(context).showSnackBar(SnackBar(content: Text("Err!"),duration: Duration(seconds: 1),));
-    }
-  }
+  
   void initPlayer()async{
     videoPlayerController = VideoPlayerController.file(File(this.widget.path));
     await videoPlayerController.initialize();
@@ -54,8 +39,8 @@ class _FullScreenState extends State<FullScreen> {
 
   @override
   void dispose() {
-    videoPlayerController.dispose();
-    chewieController.dispose();
+    widget.isVideo?videoPlayerController.dispose():null;
+    widget.isVideo?chewieController.dispose():null;
     super.dispose();
   }
   @override
@@ -71,7 +56,7 @@ class _FullScreenState extends State<FullScreen> {
         child: Center(child: Image.file(File(this.widget.path)))),
         floatingActionButton: Builder(
           builder: (context,) {
-            return FloatingActionButton(onPressed:()=>_save(context), child: Icon(Icons.save),);
+            return FloatingActionButton(onPressed:()=>MainOps.save(context, this.widget.path), child: Icon(Icons.save),);
           }
         ),
     );
